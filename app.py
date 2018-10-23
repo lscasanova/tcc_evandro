@@ -24,14 +24,28 @@ alunos = [
     }
 ]
 
-@app.route('/tcc/api/v1.0/alunos', methods=['GET'])
+@app.route('/alunos', methods=['GET'])
 def get_alunos():
     return jsonify({'alunos': alunos})
 
 
-@app.route('/tcc/api/v1.0/alunos/<int:aluno_id>', methods=['GET'])
-def get_aluno(aluno_id):
-    aluno = [aluno for aluno in alunos if aluno['id'] == aluno_id]
+@app.route('/alunos/ra/<aluno_ra>', methods=['GET'])
+def get_aluno_ra(aluno_ra):
+    aluno = [aluno for aluno in alunos if aluno['ra'] == aluno_ra]
+    if len(aluno) == 0:
+        abort(404)
+    return jsonify({'aluno': aluno[0]})
+
+@app.route('/alunos/cpf/<aluno_cpf>', methods=['GET'])
+def get_aluno_cpf(aluno_cpf):
+    aluno = [aluno for aluno in alunos if aluno['cpf'] == aluno_cpf]
+    if len(aluno) == 0:
+        abort(404)
+    return jsonify({'aluno': aluno[0]})
+
+@app.route('/alunos/nome/<aluno_nome>', methods=['GET'])
+def get_aluno_nome(aluno_nome):
+    aluno = [aluno for aluno in alunos if aluno['nome'] == aluno_nome]
     if len(aluno) == 0:
         abort(404)
     return jsonify({'aluno': aluno[0]})
