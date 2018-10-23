@@ -16,7 +16,7 @@ unsigned long byteCount = 0;
 bool printWebData = true;
 
 // Servidor para a consulta dos alunos
-char server[] = "https://servidor-tcc.herokuapp.com";
+char server[] = "servidor-tcc.herokuapp.com";
 
 void setup() {
   // Open serial communications and wait for port to open:
@@ -57,7 +57,7 @@ void setup() {
     Serial.println(client.remoteIP());
     // Make a HTTP request:
     client.println("GET /alunos/ra/20606884 HTTP/1.1");
-    client.println("Host: https://servidor-tcc.herokuapp.com");
+    client.println("Host: servidor-tcc.herokuapp.com");
     client.println("Connection: close");
     client.println();
   } else {
