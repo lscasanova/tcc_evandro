@@ -1,14 +1,22 @@
-tcc_evandro
+# API para consulta ao banco de alunos
 
-curl -i -H GET http://servidor-tcc.herokuapp.com/alunos
+## Consultar todos os alunos
+GET http://servidor-tcc.herokuapp.com/alunos
 
-curl -i -H GET http://servidor-tcc.herokuapp.com/aluno/<ra>
+## Consultar aluno pelo RA
+GET http://servidor-tcc.herokuapp.com/aluno/$ra
 
-curl -i -H "Content-Type: application/json" -X PUT -d '{"uuid":"khasdlkasdlkasskhdklklda"}' http://servidor-tcc.herokuapp.com/alunos/cadastro/20606884
+## Vincular uuid do bluetooth ao aluno
+PUT http://servidor-tcc.herokuapp.com/alunos/cadastro/20606884
 
-curl -i -H "Content-Type: application/json" -X PUT -d '{"data_hora":"20181107195200"}' http://servidor-tcc.herokuapp.com/alunos/logon/khasdlkasdlkasskhdklklda
+Body: {"uuid":"khasdlkasdlkasskhdklklda"}' 
 
-curl -i -H "Content-Type: application/json" -X PUT -d '{"data_hora":"20181107201100"}' http://servidor-tcc.herokuapp.com/alunos/logoff/khasdlkasdlkasskhdklklda
+## Registrar data e hora do login do aluno
+PUT http://servidor-tcc.herokuapp.com/alunos/logon/khasdlkasdlkasskhdklklda
 
-# Cadastro de usuário
-curl -i -H "Content-Type: application/json" -X POST -d '{"nome":"LEANDRO DOS SANTOS","ra":"12345678", "cpf":"31774917807"}' http://localhost:5000/aluno/cadastro
+Body: '{"data_hora":"20181107195200"}' 
+
+## Registrar data e hora do logoff do aluno
+PUT http://servidor-tcc.herokuapp.com/alunos/logoff/khasdlkasdlkasskhdklklda
+
+Body: '{"data_hora":"20181107201100"}' 
