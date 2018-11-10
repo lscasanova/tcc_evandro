@@ -30,7 +30,7 @@ def get_alunos():
     dict_aluno = {}
     list_alunos = []
     for aluno in alunos:
-        dict_aluno.update({'nome': aluno.nome,
+        dict_aluno = ({'nome': aluno.nome,
                               'ra': aluno.ra,
                               'cpf': aluno.cpf,
                               'uuid': aluno.uuid,
