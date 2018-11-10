@@ -1,98 +1,100 @@
 #!flask/bin/python
 from flask import Flask, jsonify, abort, make_response, request
+from flask_sqlalchemy import SQLAlchemy
+import os
+
+
 
 app = Flask(__name__)
+app.config.from_object(os.environ['APP_SETTINGS'])
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+db = SQLAlchemy(app)
 
-alunos = [
-    {
-        'id': 1,
-        'uuid':'',
-        'ra': u'20606884',
-        'nome': u'EVANDRO DOS SANTOS', 
-        'cpf': u'37160902807',
-        'data_hora_login':"",
-        'data_hora_logoff':"",
-    },
-    {
-        'id': 2,
-        'uuid':'',
-        'ra': u'20547540',
-        'nome': u'RUTE CARDOSO', 
-        'cpf': u'37160902806',
-        'data_hora_login':"",
-        'data_hora_logoff':"",
-    },
-    {
-        'id': 3,
-        'uuid':'',
-        'ra': u'20904866',
-        'nome': u'RAFAEL OKADA', 
-        'cpf': u'37160902805',
-        'data_hora_login':"",
-        'data_hora_logoff':"",
-    }
-]
+
+class Aluno(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(80), nullable=False)
+    cpf = db.Column(db.String(11), unique=True, nullable=False)
+    ra = db.Column(db.String(8), unique=True, nullable=False)
+    uuid = db.Column(db.String(32), unique=True)
+    data_hora_login = db.Column(db.String(14), unique=True)
+    data_hora_logoff = db.Column(db.String(14), unique=True)
+
+    def as_dict(self):
+       return {c.name: getattr(self, c.name) for c in self.__table__.columns}
+
 
 @app.route('/alunos', methods=['GET'])
 def get_alunos():
-    return jsonify({'alunos': alunos})
+    alunos = Aluno.query.all()
+    dict_aluno = {}
+    list_alunos = []
+    for aluno in alunos:
+        dict_aluno.update({'nome': aluno.nome,
+                              'ra': aluno.ra,
+                              'cpf': aluno.cpf,
+                              'uuid': aluno.uuid,
+                              'data_hora_login': aluno.data_hora_login,
+                              'data_hora_logoff': aluno.data_hora_logoff,
+                             })
+        list_alunos.append(dict_aluno)
+    json_alunos = jsonify({'alunos': list_alunos})
+    return json_alunos
 
 
-@app.route('/alunos/ra/<aluno_ra>', methods=['GET'])
+@app.route('/aluno/<aluno_ra>', methods=['GET'])
 def get_aluno_ra(aluno_ra):
-    aluno = [aluno for aluno in alunos if aluno['ra'] == aluno_ra]
-    if len(aluno) == 0:
-        abort(404)
-    return jsonify({'aluno': aluno[0]})
+    aluno = Aluno.query.filter_by(ra=aluno_ra).first_or_404()
+    return jsonify({'nome': aluno.nome,
+                    'ra': aluno.ra,
+                    'cpf': aluno.cpf,
+                    'uuid': aluno.uuid,
+                    'data_hora_login': aluno.data_hora_login,
+                    'data_hora_logoff': aluno.data_hora_logoff,
+                    })
 
-@app.route('/alunos/cpf/<aluno_cpf>', methods=['GET'])
-def get_aluno_cpf(aluno_cpf):
-    aluno = [aluno for aluno in alunos if aluno['cpf'] == aluno_cpf]
-    if len(aluno) == 0:
-        abort(404)
-    return jsonify({'aluno': aluno[0]})
 
-@app.route('/alunos/nome/<aluno_nome>', methods=['GET'])
-def get_aluno_nome(aluno_nome):
-    aluno = [aluno for aluno in alunos if aluno['nome'] == aluno_nome]
-    if len(aluno) == 0:
-        abort(404)
-    return jsonify({'aluno': aluno[0]})
+@app.route('/aluno/cadastro', methods=['POST'])
+def cadastro_aluno():
+    aluno = Aluno(nome=request.json.get('nome'),
+                  cpf=request.json.get('cpf'),
+                  ra=request.json.get('ra')
+    )
+    db.session.add(aluno)
+    db.session.commit()
 
-@app.route('/alunos/cadastro/<aluno_ra>', methods=['PUT'])
+    return jsonify(success=True), 200
+
+
+@app.route('/aluno/cadastro/<aluno_ra>', methods=['PUT'])
 def update_aluno(aluno_ra):
-    aluno = [aluno for aluno in alunos if aluno['ra'] == aluno_ra]
-    if len(aluno) == 0:
-        abort(404)
-    if not request.json:
-        abort(400)
+    aluno = Aluno.query.filter_by(ra=aluno_ra).first_or_404()
+    aluno.uuid = request.json.get('uuid')
+    db.session.add(aluno)
+    db.session.commit()
 
-    aluno[0]['uuid'] = request.json.get('uuid', aluno[0]['uuid'])
-    return jsonify({'aluno': aluno[0]}), 201
+    return jsonify(success=True), 201
 
-@app.route('/alunos/logon/<aluno_uuid>', methods=['PUT'])
+
+@app.route('/aluno/logon/<aluno_uuid>', methods=['PUT'])
 def logon_aluno(aluno_uuid):
-    aluno = [aluno for aluno in alunos if aluno['uuid'] == aluno_uuid]
-    if len(aluno) == 0:
-        abort(404)
-    if not request.json:
-        abort(400)
+    aluno = Aluno.query.filter_by(uuid=aluno_uuid).first_or_404()
+    
+    aluno.data_hora_login = request.json.get('data_hora')
+    db.session.add(aluno)
+    db.session.commit()
+    
+    return jsonify(success=True), 201
 
-    lista_horarios = []
-    aluno[0]['data_hora_login'] = request.json.get('data_hora', aluno[0]['data_hora_login'])
-    return jsonify({'aluno': aluno[0]}), 201
-
-@app.route('/alunos/logoff/<aluno_uuid>', methods=['PUT'])
+@app.route('/aluno/logoff/<aluno_uuid>', methods=['PUT'])
 def logoff_aluno(aluno_uuid):
-    aluno = [aluno for aluno in alunos if aluno['uuid'] == aluno_uuid]
-    if len(aluno) == 0:
-        abort(404)
-    if not request.json:
-        abort(400)
-
-    lista_horarios = []
-    aluno[0]['data_hora_logoff'] = request.json.get('data_hora', aluno[0]['data_hora_logoff'])
-    return jsonify({'aluno': aluno[0]}), 201
+    aluno = Aluno.query.filter_by(uuid=aluno_uuid).first_or_404()
+    
+    aluno.data_hora_logoff = request.json.get('data_hora')
+    db.session.add(aluno)
+    db.session.commit()
+    
+    return jsonify(success=True), 201
 
 @app.errorhandler(404)
 def not_found(error):

@@ -56,7 +56,7 @@ void setup() {
     Serial.print("connected to ");
     Serial.println(client.remoteIP());
     // Make a HTTP request:
-    client.println("GET /alunos/ra/20606884 HTTP/1.1");
+    client.println("GET /alunos HTTP/1.1");
     client.println("Host: servidor-tcc.herokuapp.com");
     client.println("Connection: close");
     client.println();

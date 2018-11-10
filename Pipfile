@@ -8,6 +8,10 @@ flask = "*"
 sqlalchemy = "*"
 pip = "==18.0"
 gunicorn = "*"
+"psycopg2" = "*"
+flask-sqlalchemy = "*"
+flask-migrate = "*"
+flask-script = "*"
 
 [dev-packages]
 
